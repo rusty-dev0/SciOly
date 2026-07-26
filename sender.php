@@ -6,80 +6,163 @@ use Dotenv\Dotenv;
 
 require 'vendor/autoload.php';
 
-if (!isset($_GET['email']) || empty(trim($_GET['email']))) {
-    http_response_code(400);
-    die('Error: Missing recipient email address.');
+function parseStringForHTML($string) {
+    if (!is_string($string)) {
+        http_response_code(400);
+        exit('Error: Invalid parameter.');
+    }
+
+    $string = trim(strip_tags($string));
+
+    if ($string === '') {
+        http_response_code(400);
+        exit('Error: Missing required parameter.');
+    }
+
+    $string = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $string);
+
+    return $string;
 }
 
-$recipientEmail = filter_var(trim($_GET['email']), FILTER_VALIDATE_EMAIL);
+function parseEmailFrom($email) {
+    $email = parseStringForHTML($email);
+    if (!isset($email) || empty(trim($email))) {
+        http_response_code(400);
+        die('Error: Missing recipient email address.');
+    }
 
-if (!$recipientEmail) {
-    http_response_code(400);
-    die('Error: Invalid email address format.');
+    $recipientEmail = filter_var(trim($email), FILTER_VALIDATE_EMAIL);
+
+    if (!$recipientEmail) {
+        http_response_code(400);
+        die('Error: Invalid email address format.');
+    }
+    return $recipientEmail;
 }
 
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-$mail = new PHPMailer(true);
+function sendOTP($recipientEmail, $name, $otp) {
+    global $dotenv;
+    $mail = new PHPMailer(true);
 
-$message = <<<EOD
-<html>
-    <body>
-        <h2>Hello,</h2>
+    $message = <<<EOD
+    <html>
+        <body>
+            <h3>Hello,</h3>
 
-        <p>It looks like you requested to reset your password. Please click <a href="http://example.com/reset-password">here</a> to have it reset.</p>
+            <p>Welcome to StatixLabs, {$name}!</p>
 
-        <p>Best regards,<br/>
-        The StatixLabs Team</p>
-    </body>
-</html>
-EOD;
+            <p>Thank you for creating an account with us. Your OTP is: <strong>{$otp}</strong></p>
 
-$message = str_replace("\r\n", "\n", $message);
-$message = str_replace("\n", "\r\n", $message);
+            <p>Best regards,<br/>
+            <h4>The StatixLabs Team</h4></p>
+        </body>
+    </html>
+    EOD;
 
-$message = wordwrap($message, 70, "\r\n");
+    try {
 
-try {
+        $mail->isSMTP();
 
-    $mail->isSMTP();
+        $mail->Host       = 'smtp-relay.brevo.com';
 
-    $mail->Host       = 'smtp-relay.brevo.com';
+        $mail->SMTPAuth   = true;
 
-    $mail->SMTPAuth   = true;
+        $mail->Username   = $_ENV['BREVO_USERNAME'];
 
-    $mail->Username   = $_ENV['BREVO_USERNAME'];
+        $mail->Password   = $_ENV['BREVO_PASSWORD'];
 
-    $mail->Password   = $_ENV['BREVO_PASSWORD'];
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
 
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = 587;
 
-    $mail->Port       = 587;
+        $mail->isHTML(true); // this should handle wrap and headers
 
- 
+        $mail->setFrom('noreply@statixlabs.org', 'StatixLabs');
 
-    $mail->setFrom('noreply@statixlabs.org', 'StatixLabs');
+        $mail->addAddress($recipientEmail, $name);
 
-    $mail->addAddress($recipientEmail, 'User');
+        $mail->addReplyTo('satej@statixlabs.org', 'Support');
 
-    $mail->addReplyTo('satej@statixlabs.org', 'Support');
+    
 
- 
+        $mail->Subject = 'Your OTP from StatixLabs';
 
-    $mail->Subject = 'Password Reset Request';
+        $mail->Body    = $message;
 
-    $mail->Body    = $message;
+        $mail->altBody = 'Whoops. Something went wrong.';
 
-    $mail->altBody = 'Whoops. Something went wrong.';
+        $mail->send();
 
-    $mail->send();
+        echo 'Email sent successfully';
 
-    echo 'Email sent successfully';
+    } catch (Exception $e) {
 
-} catch (Exception $e) {
+        http_response_code(500);
+        echo "Error: {$mail->ErrorInfo}";
 
-    http_response_code(500);
-    echo "Error: {$mail->ErrorInfo}";
+    }
+}
 
+function sendPasswordResetEmail($recipientEmail) {
+    global $dotenv;
+    $mail = new PHPMailer(true);
+
+    $message = <<<EOD
+    <html>
+        <body>
+            <h2>Hello,</h2>
+
+            <p>It looks like you requested to reset your password. Please click <a href="http://example.com/reset-password">here</a> to have it reset.</p>
+
+            <p>Best regards,<br/>
+            The StatixLabs Team</p>
+        </body>
+    </html>
+    EOD;
+
+    try {
+
+        $mail->isSMTP();
+
+        $mail->Host       = 'smtp-relay.brevo.com';
+
+        $mail->SMTPAuth   = true;
+
+        $mail->Username   = $_ENV['BREVO_USERNAME'];
+
+        $mail->Password   = $_ENV['BREVO_PASSWORD'];
+
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+
+        $mail->Port       = 587;
+
+        $mail->isHTML(true); // this should handle wrap and headers
+
+        $mail->setFrom('noreply@statixlabs.org', 'StatixLabs');
+
+        $mail->addAddress($recipientEmail, 'User');
+
+        $mail->addReplyTo('satej@statixlabs.org', 'Support');
+
+    
+
+        $mail->Subject = 'Password Reset Request';
+
+        $mail->Body    = $message;
+
+        $mail->altBody = 'Whoops. Something went wrong.';
+
+        $mail->send();
+
+        echo 'Email sent successfully';
+
+    } catch (Exception $e) {
+
+        http_response_code(500);
+        echo "Error: {$mail->ErrorInfo}";
+
+    }
 }

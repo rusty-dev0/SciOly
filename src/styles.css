@@ -1,0 +1,91 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #005a9e; /* Classic Windows Aero Blue Accent */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.window {
+    width: 420px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.field-group {
+    margin-bottom: 10px;
+}
+
+.field-group label {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.field-group input, .field-group select {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.alert-box {
+    padding: 6px 10px;
+    margin-bottom: 10px;
+    border: 1px solid #d9d9d9;
+    background: #fff;
+    font-size: 12px;
+}
+
+.alert-box.error {
+    border-color: #e57373;
+    background: #ffebee;
+    color: #c62828;
+}
+
+.alert-box.success {
+    border-color: #81c784;
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.balloon-tooltip {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.balloon-tooltip .balloon-content {
+    background-color: #ffffe1; 
+    border: 1px solid #767676;
+    border-radius: 3px;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: #000;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+.balloon-tooltip .balloon-content::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 15px;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid #767676;
+}
+
+.balloon-tooltip .balloon-content::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 16px;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid #ffffe1;
+}
