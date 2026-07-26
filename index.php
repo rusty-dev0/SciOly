@@ -144,42 +144,7 @@ if (isset($_GET['cancel_otp'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SciOly User Portal</title>
     <link rel="stylesheet" href="https://unpkg.com/7.css">
-    <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            background-color: #005a9e;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .window {
-            width: 420px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-        }
-
-        .field-group {
-            margin-bottom: 12px;
-        }
-
-        .field-group label {
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .field-group input, .field-group select {
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        /* Spacing for native 7.css tooltip */
-        div[role="tooltip"] {
-            margin-bottom: 12px;
-        }
-    </style>
+    <link rel="stylesheet" href="styles/index.css">
 </head>
 <body>
 
@@ -196,14 +161,16 @@ if (isset($_GET['cancel_otp'])) {
     <div class="window-body has-space">
 
         <?php if ($error): ?>
-            <div role="tooltip" class="balloon">
-                <strong>Error:</strong> <?= htmlspecialchars($error) ?>
+            <div role="tooltip" class="balloon" style="display: flex; align-items: center; gap: 6px;">
+                <img src="https://win98icons.alexmeub.com/icons/png/msg_error-2.png" alt="Error" style="width: 16px; height: 16px;">
+                <span><?= htmlspecialchars($error) ?></span>
             </div>
         <?php endif; ?>
 
         <?php if ($success): ?>
-            <div role="tooltip" class="balloon">
-                <strong>Notice:</strong> <?= htmlspecialchars($success) ?>
+            <div role="tooltip" class="balloon" style="display: flex; align-items: center; gap: 6px;">
+                <img src="https://win98icons.alexmeub.com/icons/png/msg_information-2.png" alt="Info" style="width: 16px; height: 16px;">
+                <span><?= htmlspecialchars($success) ?></span>
             </div>
         <?php endif; ?>
 

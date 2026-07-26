@@ -52,12 +52,14 @@ function sendOTP($recipientEmail, $name, $otp) {
         <body>
             <h3>Hello,</h3>
 
-            <p>Welcome to StatixLabs, {$name}!</p>
+            <p>Welcome to Science Olympiad, {$name}!</p>
 
-            <p>Thank you for creating an account with us. Your OTP is: <strong>{$otp}</strong></p>
+            <p>Thank you for creating an account with us. Your OTP is: <strong style="font-size: 18px; letter-spacing: 2px;">{$otp}</strong></p>
+
+            <p>This code will expire in 10 minutes. If you did not request an account creation, please ignore this email.</p>
 
             <p>Best regards,<br/>
-            <h4>The StatixLabs Team</h4></p>
+            <h4>The StatixLabs SciOly Team</h4></p>
         </body>
     </html>
     EOD;
@@ -92,11 +94,12 @@ function sendOTP($recipientEmail, $name, $otp) {
 
         $mail->Body    = $message;
 
-        $mail->altBody = 'Whoops. Something went wrong.';
+        $mail->AltBody = 'Your OTP for StatixLabs is: ' . $otp;
 
         $mail->send();
 
-        echo 'Email sent successfully';
+        // echo 'Email sent successfully';
+        return true;
 
     } catch (Exception $e) {
 
@@ -106,19 +109,23 @@ function sendOTP($recipientEmail, $name, $otp) {
     }
 }
 
-function sendPasswordResetEmail($recipientEmail) {
+function sendPasswordResetEmail($recipientEmail, $otp) {
     global $dotenv;
     $mail = new PHPMailer(true);
 
     $message = <<<EOD
     <html>
         <body>
-            <h2>Hello,</h2>
+            <h3>Hello,</h3>
 
-            <p>It looks like you requested to reset your password. Please click <a href="http://example.com/reset-password">here</a> to have it reset.</p>
+            <p>We received a request to reset your password for your Science Olympiad account.</p>
+
+            <p>Your password reset OTP code is: <strong style="font-size: 18px; letter-spacing: 2px;">{$otp}</strong></p>
+
+            <p>This code will expire in 15 minutes. If you did not request a password reset, please ignore this email.</p>
 
             <p>Best regards,<br/>
-            The StatixLabs Team</p>
+            <h4>The StatixLabs SciOly Team</h4></p>
         </body>
     </html>
     EOD;
@@ -139,7 +146,7 @@ function sendPasswordResetEmail($recipientEmail) {
 
         $mail->Port       = 587;
 
-        $mail->isHTML(true); // this should handle wrap and headers
+        $mail->isHTML(true);
 
         $mail->setFrom('noreply@statixlabs.org', 'StatixLabs');
 
@@ -147,22 +154,21 @@ function sendPasswordResetEmail($recipientEmail) {
 
         $mail->addReplyTo('satej@statixlabs.org', 'Support');
 
-    
-
-        $mail->Subject = 'Password Reset Request';
+        $mail->Subject = 'Password Reset OTP - StatixLabs';
 
         $mail->Body    = $message;
 
-        $mail->altBody = 'Whoops. Something went wrong.';
+        $mail->AltBody = 'Your password reset OTP code is: ' . $otp;
 
         $mail->send();
 
-        echo 'Email sent successfully';
+        return true;
 
     } catch (Exception $e) {
 
         http_response_code(500);
         echo "Error: {$mail->ErrorInfo}";
+        return false;
 
     }
 }
